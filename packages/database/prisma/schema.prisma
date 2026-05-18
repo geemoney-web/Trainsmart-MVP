@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String    @unique
+  password_hash String
+  full_name     String
+  refresh_token String?
+  created_at    DateTime  @default(now()) @db.Timestamptz
+  updated_at    DateTime  @updatedAt @db.Timestamptz
+  deleted_at    DateTime? @db.Timestamptz
+
+  @@index([email])
+  @@index([deleted_at])
+  @@map("users")
+}
+
+model Rto {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  asqa_code        String
+  operating_states String[]
+  contact_name     String?
+  contact_email    String?
+  contact_phone    String?
+  status_color     String    @default("gray")
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
+  deleted_at       DateTime? @db.Timestamptz
+
+  qualifications RtoQualification[]
+  trainers       Trainer[]
+  tas_documents  TasDocument[]
+  validations    Validation[]
+  documents      Document[]
+  tasks          Task[]
+  alerts         ComplianceAlert[]
+  notes          Note[]
+
+  @@index([asqa_code])
+  @@index([deleted_at])
+  @@map("rtos")
+}
+
+model RtoQualification {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id     String    @db.Uuid
+  rto        Rto       @relation(fields: [rto_id], references: [id])
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+  deleted_at DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("rto_qualifications")
+}
+
+model Trainer {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id     String    @db.Uuid
+  rto        Rto       @relation(fields: [rto_id], references: [id])
+  full_name  String
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+  deleted_at DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("trainers")
+}
+
+model TasDocument {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id     String    @db.Uuid
+  rto        Rto       @relation(fields: [rto_id], references: [id])
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+  deleted_at DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("tas_documents")
+}
+
+model Validation {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id       String    @db.Uuid
+  rto          Rto       @relation(fields: [rto_id], references: [id])
+  planned_date DateTime? @db.Timestamptz
+  status       String    @default("Scheduled")
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+  deleted_at   DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("validations")
+}
+
+model Document {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id     String    @db.Uuid
+  rto        Rto       @relation(fields: [rto_id], references: [id])
+  file_key   String
+  file_name  String
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+  deleted_at DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("documents")
+}
+
+model Task {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id     String    @db.Uuid
+  rto        Rto       @relation(fields: [rto_id], references: [id])
+  title      String
+  status     String    @default("Open")
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+  deleted_at DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("tasks")
+}
+
+model ComplianceAlert {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id     String    @db.Uuid
+  rto        Rto       @relation(fields: [rto_id], references: [id])
+  resolved   Boolean   @default(false)
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+  deleted_at DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("compliance_alerts")
+}
+
+model Note {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id     String    @db.Uuid
+  rto        Rto       @relation(fields: [rto_id], references: [id])
+  content    String
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+  deleted_at DateTime? @db.Timestamptz
+
+  @@index([rto_id])
+  @@index([deleted_at])
+  @@map("notes")
+}
