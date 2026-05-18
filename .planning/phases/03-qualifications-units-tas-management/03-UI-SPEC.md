@@ -44,6 +44,8 @@ Registry safety gate: not applicable.
 
 Scale: 4px base unit, multiples of 4 only.
 
+Standard set extended with 12px (`gap-3`/`p-3`) and 20px (`gap-5`/`p-5`) — established codebase patterns confirmed in `app-sidebar.tsx` and `rto-card.tsx`. Do not remove these steps.
+
 | Step | px | Tailwind class | Primary use |
 |------|----|----------------|-------------|
 | 1 | 4px | `gap-1`, `p-1` | Icon padding, tight badge gaps |
@@ -67,11 +69,13 @@ Font family: Inter (declared in `globals.css` `@theme { --font-sans: 'Inter' }`)
 | Role | Size | Weight | Line-height | Tailwind classes | Used for |
 |------|------|--------|-------------|------------------|----------|
 | Page heading | 24px (1.5rem) | 600 semibold | 1.25 (`leading-tight`) | `text-2xl font-semibold leading-tight` | Page H1 (established: "RTO Dashboard") |
-| Section heading | 20px (1.25rem) | 600 semibold | 1.2 | `text-xl font-semibold` | Section H2 within pages, "Qualifications", "Units" |
+| Section heading | 20px (1.25rem) | 600 semibold | 1.2 | `text-xl font-semibold` | Section H2 within pages — "Units", "TAS Documents", "Elements & Performance Criteria", "Historical Snapshots", "Qualifications" |
 | Subsection heading | 16px (1rem) | 600 semibold | 1.25 | `text-base font-semibold leading-tight` | Element group headings, detail section titles |
 | Body / table | 14px (0.875rem) | 400 regular | 1.5 | `text-sm` | Table cells, description text, badge labels, form labels, body content |
 
 Only two weights in use: 400 (regular) and 600 (semibold). Do not introduce 500 or 700.
+
+Four distinct sizes only: 14px / 16px / 20px / 24px. Do not introduce an 18px (`text-lg`) size anywhere in Phase 3.
 
 Monospace exception: qualification codes and unit codes use `font-mono text-sm` — established pattern in `QualificationsTab.tsx`.
 
@@ -102,7 +106,7 @@ These are ADDITIONS to the 60/30/10 for compliance-specific meaning. Use ONLY fo
 
 ## Status Badges
 
-Badges follow the existing pattern from `QualificationsTab.tsx` (lines 92–100): `px-2 py-0.5 rounded text-xs font-medium`.
+Badges: `px-2 py-1 rounded text-xs font-medium`. (Updated from `py-0.5` to `py-1` to conform to the 4px grid — the existing QualificationsTab.tsx badge pattern will be updated to match during implementation.)
 
 | Badge label | Background + text classes | When shown |
 |-------------|--------------------------|------------|
@@ -160,7 +164,7 @@ Training Package: {code}  |  Last Synced: {date}  |  Superseded by: {code} (if a
 
 ─────────────────────────────────────────────────────────────────────
 [Section: Units]                        ← mt-8
-  Section header: text-lg font-semibold mb-4 + unit count badge (muted, text-xs)
+  Section header: text-xl font-semibold mb-4 + unit count badge (muted, text-xs)
   Units table (same pattern as QualificationsTab):
     Columns: Code | Title | Status | [arrow icon →]
     Rows: hover:bg-muted/50, entire row is a Link to /rto/[id]/units/[unitId]
@@ -169,7 +173,7 @@ Training Package: {code}  |  Last Synced: {date}  |  Superseded by: {code} (if a
 
 ─────────────────────────────────────────────────────────────────────
 [Section: TAS Documents]               ← mt-8
-  Section header: text-lg font-semibold mb-4 + "Upload TAS" button (primary, right-aligned)
+  Section header: text-xl font-semibold mb-4 + "Upload TAS" button (primary, right-aligned)
   TAS version history list (see TAS Version History List spec below)
 
 ─────────────────────────────────────────────────────────────────────
@@ -204,13 +208,13 @@ Superseded by: {code} (if applicable)
 
 ─────────────────────────────────────────────────────────────────────
 [Section: Elements & Performance Criteria]   ← mt-8
-  Section header: text-lg font-semibold mb-4
+  Section header: text-xl font-semibold mb-4
 
   Per element — a stacked card block:
   ┌────────────────────────────────────────────────────────┐
   │  Element N: {Element title}                            │  ← text-base font-semibold, bg-card, p-4, rounded-lg, border border-border
   │                                                        │
-  │  N.1  {Performance criterion text}                     │  ← text-sm, pl-4 indent, py-1.5
+  │  N.1  {Performance criterion text}                     │  ← text-sm, pl-4 indent, py-2
   │  N.2  {Performance criterion text}                     │
   │  N.3  {Performance criterion text}                     │
   └────────────────────────────────────────────────────────┘
@@ -222,7 +226,7 @@ Superseded by: {code} (if applicable)
 
 ─────────────────────────────────────────────────────────────────────
 [Section: Historical Snapshots]        ← mt-8
-  Section header: text-lg font-semibold mb-4 + snapshot count (muted badge, e.g. "3 snapshots")
+  Section header: text-xl font-semibold mb-4 + snapshot count (muted badge, e.g. "3 snapshots")
 
   Timeline list (see Historical Snapshot Timeline spec below)
 ```
@@ -247,7 +251,7 @@ Renders within the TAS Documents section. Each TAS record is a row.
 - Version label: `font-medium text-foreground`
 - File name: `text-muted-foreground text-xs`
 - Review date: `ml-auto text-xs text-muted-foreground` (right-aligned)
-- Download icon: `ml-2 h-4 w-4 text-muted-foreground hover:text-foreground` (Lucide `Download`)
+- Download icon: `ml-2 h-4 w-4 text-muted-foreground hover:text-foreground` (Lucide `Download`), with `aria-label="Download {file_name}"` on the button element
 - Rows are NOT links — download triggers file fetch via presigned URL
 - Empty state within section: `py-8 text-center text-sm text-muted-foreground` — "No TAS documents uploaded yet."
 
@@ -284,7 +288,7 @@ Modal container follows `AddRtoDialog` pattern exactly:
 - Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-black/60`
 - Panel: `bg-card rounded-xl border border-border shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto`
 - Header: `flex items-center justify-between p-6 border-b border-border`
-- Title: `text-lg font-semibold` — "Upload TAS Document"
+- Title: `text-xl font-semibold` — "Upload TAS Document"
 - Close button: `text-muted-foreground hover:text-foreground transition-colors` — Lucide `X` icon, `h-4 w-4`
 - Form body: `px-6 pb-6 space-y-4 mt-4`
 
@@ -296,13 +300,13 @@ Form fields in order:
 | Qualification | Select / pre-filled read-only display | Yes | When pre-filled from qualification detail: `bg-muted px-3 py-2 rounded-md text-sm border border-input` read-only display. When from TAS tab: `<select>` using same class pattern as other inputs |
 | Version Label | `<input type="text">` | Yes | Placeholder: `e.g. v3 or Jan 2026`. Class: `w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring` |
 | Review Date | `<input type="date">` | No | Same input class. Label: "Review Date (optional)" |
-| Initial Status | Two radio buttons or segmented toggle | Yes | Options: Draft / Current. Default: Draft. Render as: `flex gap-4` with `<label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio"> Draft</label>` pattern |
+| Initial Status | Two radio buttons or segmented toggle | Yes | Options: Draft / Current. Default: Draft. Render as: `flex gap-4` with `<label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio"> Draft</label>` pattern |
 
 Validation errors: `text-xs text-destructive mt-1` below each field — established pattern from `AddRtoDialog`.
 
 Form footer (action row):
 - `flex justify-end gap-3 pt-2`
-- Cancel: `rounded-md border border-border px-4 py-2 text-sm hover:bg-muted transition-colors`
+- Cancel: `rounded-md border border-border px-4 py-2 text-sm hover:bg-muted transition-colors` — label: "Discard Changes"
 - Submit CTA: `rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50`
 - Submit label: "Upload TAS" (idle) / "Uploading..." (in-progress, button disabled)
 - Upload progress: show a simple `text-sm text-muted-foreground` status line below the form inputs: "Uploading file... please wait." No progress bar required for MVP.
@@ -391,7 +395,7 @@ Follows the presigned S3 pattern from Phase 1 (CLAUDE.md):
 |---------|-------|
 | Add TAS from qualification detail | "Upload TAS" |
 | Submit TAS upload form | "Upload TAS" (idle) / "Uploading..." (in-progress) |
-| Cancel modal | "Discard" (matches existing pattern from AddRtoDialog) |
+| Cancel modal | "Discard Changes" |
 
 ### Empty States
 
@@ -433,6 +437,7 @@ No destructive actions in Phase 3. TAS records are never deleted (D-09, TAS-04).
 - All modal dialogs: `role="dialog"` `aria-modal="true"` `aria-labelledby="{heading-id}"` — matches existing `AddRtoDialog`.
 - Close buttons: `aria-label="Close"`.
 - Expand/collapse trigger rows: `aria-expanded={isOpen}` `aria-controls="{content-id}"`.
+- Download buttons on TAS rows: `aria-label="Download {file_name}"` — identifies the specific file being downloaded.
 - Status badges: not interactive, no ARIA required — purely visual.
 - Skeleton loaders: wrap in `aria-busy="true"` on the containing region.
 - Breadcrumb nav: `aria-label="Breadcrumb"` on the containing `<nav>`.
@@ -480,6 +485,16 @@ No third-party registries. No new npm packages required for Phase 3 UI. All depe
 | Touch target minimum | `apps/web/components/layout/app-sidebar.tsx` `min-h-[44px]` |
 | TAS modal trigger decision | Researcher decision — consistent with existing modal-only dialog pattern; no slide-over exists in codebase |
 | Snapshot one-at-a-time expand | Researcher decision — reduces visual complexity for audit scanning workflow |
+
+---
+
+## Revision History
+
+| Date | Change | Trigger |
+|------|--------|---------|
+| 2026-05-18 | Initial draft | gsd-ui-researcher |
+| 2026-05-18 | Fix: replaced all `text-lg` (18px) with `text-xl` (20px) in layout specs and modal title; updated typography table to make 4-size scale explicit (14/16/20/24px); added `aria-label="Download {file_name}"` to TAS download buttons; changed cancel label from "Discard" to "Discard Changes"; added spacing note for 12px/20px established codebase patterns | gsd-ui-checker blocking issue (Dimension 4) + non-blocking recommendations (Dimensions 1, 2, 5) |
+| 2026-05-18 | Fix: replaced `py-1.5` (6px, non-scale value) with `py-2` (8px) on performance criteria rows in Unit Detail Elements spec | gsd-ui-checker blocking issue (Dimension 5 Spacing) |
 
 ---
 
