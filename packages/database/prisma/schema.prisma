@@ -18,6 +18,8 @@ model User {
   updated_at    DateTime  @updatedAt @db.Timestamptz
   deleted_at    DateTime? @db.Timestamptz
 
+  tas_uploads TasDocument[]
+
   @@index([email])
   @@index([deleted_at])
   @@map("users")
@@ -82,16 +84,44 @@ model Trainer {
 }
 
 model TasDocument {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  rto_id     String    @db.Uuid
-  rto        Rto       @relation(fields: [rto_id], references: [id])
-  created_at DateTime  @default(now()) @db.Timestamptz
-  updated_at DateTime  @updatedAt @db.Timestamptz
-  deleted_at DateTime? @db.Timestamptz
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id           String    @db.Uuid
+  rto              Rto       @relation(fields: [rto_id], references: [id])
+  qualification_id String?   @db.Uuid
+  qualification    Qualification? @relation(fields: [qualification_id], references: [id])
+  uploaded_by_id   String?   @db.Uuid
+  uploaded_by      User?     @relation(fields: [uploaded_by_id], references: [id])
+  version_label    String    @default("")
+  status           String    @default("Draft")
+  file_key         String    @default("")
+  file_name        String    @default("")
+  file_size        Int       @default(0)
+  review_date      DateTime? @db.Date
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
+  deleted_at       DateTime? @db.Timestamptz
+
+  units TasDocumentUnit[]
 
   @@index([rto_id])
+  @@index([qualification_id])
+  @@index([status])
   @@index([deleted_at])
   @@map("tas_documents")
+}
+
+model TasDocumentUnit {
+  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tas_document_id String      @db.Uuid
+  tas_document    TasDocument @relation(fields: [tas_document_id], references: [id])
+  unit_id         String      @db.Uuid
+  unit            Unit        @relation(fields: [unit_id], references: [id])
+  created_at      DateTime    @default(now()) @db.Timestamptz
+
+  @@unique([tas_document_id, unit_id])
+  @@index([tas_document_id])
+  @@index([unit_id])
+  @@map("tas_document_units")
 }
 
 model Validation {
@@ -188,6 +218,7 @@ model Qualification {
   units              QualificationUnit[]
   rto_qualifications RtoQualification[]
   snapshots          QualificationSnapshot[]
+  tas_documents      TasDocument[]
 
   @@index([code])
   @@index([status])
@@ -205,9 +236,10 @@ model Unit {
   created_at       DateTime  @default(now()) @db.Timestamptz
   updated_at       DateTime  @updatedAt @db.Timestamptz
 
-  elements       UnitElement[]
-  qualifications QualificationUnit[]
-  snapshots      UnitSnapshot[]
+  elements            UnitElement[]
+  qualifications      QualificationUnit[]
+  snapshots           UnitSnapshot[]
+  tas_document_units  TasDocumentUnit[]
 
   @@index([code])
   @@map("units")
