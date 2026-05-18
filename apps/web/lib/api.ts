@@ -8,6 +8,28 @@ export function getAccessToken() {
   return accessToken;
 }
 
+// --- TGA API helpers ---
+
+export async function searchTgaQualifications(query: string) {
+  return apiFetch(`/tga/qualifications/search?q=${encodeURIComponent(query)}`);
+}
+
+export async function importTgaQualification(
+  rtoId: string,
+  qualificationCode: string,
+) {
+  return apiFetch(`/tga/rtos/${rtoId}/qualifications/import`, {
+    method: 'POST',
+    body: JSON.stringify({ qualificationCode }),
+  });
+}
+
+export async function getRtoQualifications(rtoId: string) {
+  return apiFetch(`/tga/rtos/${rtoId}/qualifications`);
+}
+
+// --- Core fetch ---
+
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<any> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
