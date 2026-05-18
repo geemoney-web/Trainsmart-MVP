@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { RtoModule } from './rto/rto.module';
 import { UsersModule } from './users/users.module';
 import { TgaModule } from './tga/tga.module';
+import { QualificationModule } from './qualification/qualification.module';
+import { UnitModule } from './unit/unit.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { TgaModule } from './tga/tga.module';
     RtoModule,
     UsersModule,
     TgaModule,
+    QualificationModule,
+    UnitModule,
   ],
 })
 export class AppModule {}
