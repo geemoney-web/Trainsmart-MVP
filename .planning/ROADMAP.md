@@ -35,10 +35,11 @@
 2. Staff can create a new RTO and it appears on the dashboard with auto-provisioned workspace structure
 3. Navigating into an RTO workspace shows tabbed sections (Qualifications, Trainers, Documents, Tasks, Alerts, Notes) — empty but structurally correct
 
-**Plans:**
-1. Database schema — all core entities with UUID PKs, timestamps, soft deletes, relational integrity
-2. Backend scaffold — FastAPI or NestJS REST API with auth, RTO CRUD endpoints, workspace provisioning
-3. Frontend shell — Next.js + Tailwind dashboard layout, RTO list, traffic-light indicators, RTO workspace tabs
+**Plans:** 4 plans
+- [ ] 01-01-PLAN.md — Monorepo + Prisma schema + initial migration (Wave 1)
+- [ ] 01-02-PLAN.md — NestJS API: JWT auth, RTO CRUD, workspace provisioning, dashboard counts (Wave 2, parallel with 01-03)
+- [ ] 01-03-PLAN.md — Next.js frontend shell: dark sidebar, login page, RTO card grid, Add RTO dialog (Wave 2, parallel with 01-02)
+- [ ] 01-04-PLAN.md — RTO workspace tab routes + auth middleware + seed + human-verify checkpoint (Wave 3)
 
 ---
 
