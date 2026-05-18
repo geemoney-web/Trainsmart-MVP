@@ -179,5 +179,25 @@ All 57 v1 requirements delivered and verified. Platform is ready for internal Tr
 **Post-MVP backlog:** Audit pack generation, OCR, AI analysis, RBAC, client portals, LMS/SMS integrations.
 
 ---
+
+## Backlog
+
+### Phase 999.1: Fix unit status "unknown" from qualification unit grid sync (BACKLOG)
+
+**Goal:** Ensure all units have an accurate TGA status rather than "unknown". Units synced indirectly via the qualification unit grid endpoint inherit no status — only units individually fetched get a real status. This matters because the compliance rules engine (Phase 9) uses unit status to evaluate superseded/expired flags and generate alerts.
+
+**Context:** Discovered 2026-05-19 by comparing live TGA API data against the database for CPC32420. 96/96 unit codes and titles matched perfectly, but ~half the units had `status: unknown` in the DB while TGA reports them all as `current`. The TGA sync service skips individual unit fetches for units discovered via the qualification unit grid.
+
+**Fix options:**
+- Option A: After syncing a qualification's unit grid, individually fetch any linked unit where `status = 'unknown'`
+- Option B: Always individually fetch every unit regardless of discovery path (cleaner but slower)
+
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
 *Created: 2026-05-18*
-*Last updated: 2026-05-18 after initial roadmap creation*
+*Last updated: 2026-05-19 — added backlog item 999.1 (unit status unknown fix)*

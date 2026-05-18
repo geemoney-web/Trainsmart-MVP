@@ -51,14 +51,18 @@ model Rto {
 }
 
 model RtoQualification {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  rto_id     String    @db.Uuid
-  rto        Rto       @relation(fields: [rto_id], references: [id])
-  created_at DateTime  @default(now()) @db.Timestamptz
-  updated_at DateTime  @updatedAt @db.Timestamptz
-  deleted_at DateTime? @db.Timestamptz
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id           String         @db.Uuid
+  rto              Rto            @relation(fields: [rto_id], references: [id])
+  qualification_id String?        @db.Uuid
+  qualification    Qualification? @relation(fields: [qualification_id], references: [id])
+  is_active        Boolean        @default(true)
+  created_at       DateTime       @default(now()) @db.Timestamptz
+  updated_at       DateTime       @updatedAt @db.Timestamptz
+  deleted_at       DateTime?      @db.Timestamptz
 
   @@index([rto_id])
+  @@index([qualification_id])
   @@index([deleted_at])
   @@map("rto_qualifications")
 }
@@ -136,13 +140,19 @@ model Task {
 }
 
 model ComplianceAlert {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  rto_id     String    @db.Uuid
-  rto        Rto       @relation(fields: [rto_id], references: [id])
-  resolved   Boolean   @default(false)
-  created_at DateTime  @default(now()) @db.Timestamptz
-  updated_at DateTime  @updatedAt @db.Timestamptz
-  deleted_at DateTime? @db.Timestamptz
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rto_id      String    @db.Uuid
+  rto         Rto       @relation(fields: [rto_id], references: [id])
+  resolved    Boolean   @default(false)
+  alert_type  String    @default("GENERAL")
+  severity    String    @default("amber")
+  entity_type String?
+  entity_id   String?   @db.Uuid
+  title       String    @default("")
+  description String    @default("")
+  created_at  DateTime  @default(now()) @db.Timestamptz
+  updated_at  DateTime  @updatedAt @db.Timestamptz
+  deleted_at  DateTime? @db.Timestamptz
 
   @@index([rto_id])
   @@index([deleted_at])
@@ -161,4 +171,131 @@ model Note {
   @@index([rto_id])
   @@index([deleted_at])
   @@map("notes")
+}
+
+model Qualification {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String    @unique
+  title            String
+  status           String
+  superseded_by    String?
+  training_package String?
+  tga_content_hash String
+  last_synced_at   DateTime? @db.Timestamptz
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
+
+  units              QualificationUnit[]
+  rto_qualifications RtoQualification[]
+  snapshots          QualificationSnapshot[]
+
+  @@index([code])
+  @@index([status])
+  @@map("qualifications")
+}
+
+model Unit {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String    @unique
+  title            String
+  status           String
+  superseded_by    String?
+  tga_content_hash String
+  last_synced_at   DateTime? @db.Timestamptz
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
+
+  elements       UnitElement[]
+  qualifications QualificationUnit[]
+  snapshots      UnitSnapshot[]
+
+  @@index([code])
+  @@map("units")
+}
+
+model QualificationUnit {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  qualification_id String        @db.Uuid
+  qualification    Qualification @relation(fields: [qualification_id], references: [id])
+  unit_id          String        @db.Uuid
+  unit             Unit          @relation(fields: [unit_id], references: [id])
+  is_core          Boolean?
+  created_at       DateTime      @default(now()) @db.Timestamptz
+
+  @@unique([qualification_id, unit_id])
+  @@index([qualification_id])
+  @@index([unit_id])
+  @@map("qualification_units")
+}
+
+model UnitElement {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  unit_id     String   @db.Uuid
+  unit        Unit     @relation(fields: [unit_id], references: [id])
+  element_num String
+  title       String
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  performance_criteria PerformanceCriterion[]
+
+  @@index([unit_id])
+  @@map("unit_elements")
+}
+
+model PerformanceCriterion {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  element_id String      @db.Uuid
+  element    UnitElement @relation(fields: [element_id], references: [id])
+  pc_num     String
+  text       String
+  created_at DateTime    @default(now()) @db.Timestamptz
+  updated_at DateTime    @updatedAt @db.Timestamptz
+
+  @@index([element_id])
+  @@map("performance_criteria")
+}
+
+model QualificationSnapshot {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  qualification_id String        @db.Uuid
+  qualification    Qualification @relation(fields: [qualification_id], references: [id])
+  snapshot_data    Json
+  change_fields    String[]
+  snapshotted_at   DateTime      @default(now()) @db.Timestamptz
+
+  @@index([qualification_id])
+  @@index([snapshotted_at])
+  @@map("qualification_snapshots")
+}
+
+model UnitSnapshot {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  unit_id        String   @db.Uuid
+  unit           Unit     @relation(fields: [unit_id], references: [id])
+  snapshot_data  Json
+  change_fields  String[]
+  snapshotted_at DateTime @default(now()) @db.Timestamptz
+
+  @@index([unit_id])
+  @@index([snapshotted_at])
+  @@map("unit_snapshots")
+}
+
+model SyncLog {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  triggered_by   String
+  status         String    @default("running")
+  quals_checked  Int       @default(0)
+  quals_changed  Int       @default(0)
+  units_checked  Int       @default(0)
+  units_changed  Int       @default(0)
+  alerts_created Int       @default(0)
+  error_message  String?
+  started_at     DateTime  @default(now()) @db.Timestamptz
+  completed_at   DateTime? @db.Timestamptz
+
+  @@index([status])
+  @@index([started_at])
+  @@map("sync_logs")
 }
