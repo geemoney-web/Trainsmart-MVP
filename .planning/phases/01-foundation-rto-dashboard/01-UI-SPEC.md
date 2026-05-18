@@ -164,6 +164,8 @@ Accent is **reserved exclusively** for the following elements. Use nowhere else.
 └─────────────────────────────────────────────────────────┘
 ```
 
+**Primary focal point:** The "Add RTO" button (accent blue, top-right of the page header) against the neutral dashboard header background serves as the primary visual anchor, drawing the eye to the single primary action on this screen.
+
 **Card grid breakpoints:**
 
 | Breakpoint | Columns | Tailwind |
@@ -292,7 +294,7 @@ Centred card on full-height neutral background. No sidebar on login page.
 | Dashboard page CTA button | **"Add RTO"** |
 | Dialog title | **"Add New RTO"** |
 | Dialog submit button | **"Create RTO"** |
-| Dialog cancel button | **"Cancel"** |
+| Dialog cancel button | **"Discard"** |
 
 ### Form Field Labels (Create RTO Dialog)
 
@@ -349,7 +351,7 @@ Centred card on full-height neutral background. No sidebar on login page.
 
 | Action | Trigger | Confirmation copy | Confirm button | Cancel button |
 |--------|---------|-------------------|---------------|---------------|
-| Delete RTO | "Delete RTO" option (accessible from RTO workspace — if included in Phase 1 scope) | "Are you sure you want to delete [RTO Name]? This action cannot be undone." | "Delete RTO" (destructive red) | "Cancel" |
+| Delete RTO | "Delete RTO" option (accessible from RTO workspace — if included in Phase 1 scope) | "Are you sure you want to delete [RTO Name]? This action cannot be undone." | "Delete RTO" (destructive red) | "Keep RTO" |
 
 **Note:** RTO delete is a soft delete (`deleted_at` timestamp). The confirmation copy says "cannot be undone" from the user's perspective — the record is archived not destroyed, but that is an implementation detail the user does not need.
 
