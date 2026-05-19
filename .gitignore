@@ -4,7 +4,11 @@ node_modules
 dist
 .env
 .env.local
+.env.test
+.env.production
 apps/api/.env
+apps/api/.env.test
+apps/api/.env.production
 packages/database/.env
 packages/database/generated
 packages/database/prisma/migrations/dev.db*
