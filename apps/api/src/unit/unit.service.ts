@@ -36,7 +36,11 @@ export class UnitService {
       throw new NotFoundException('Unit not found');
     }
 
-    if (unit.elements.length === 0 && unit.code) {
+    const needsBackfill =
+      unit.elements.length === 0 ||
+      unit.elements.some((e) => /^\d+$/.test(e.title.trim()));
+
+    if (needsBackfill && unit.code) {
       await this.backfillElements(unit.id, unit.code);
       return prisma.unit.findUnique({
         where: { id: unitId },
@@ -67,6 +71,13 @@ export class UnitService {
     try {
       const detail = await this.tgaApiClient.getUnitDetail(code);
       if (!detail || detail.elements.length === 0) return;
+
+      // Clear existing elements (and their PCs via cascade) before re-inserting
+      const existing = await prisma.unitElement.findMany({ where: { unit_id: unitId }, select: { id: true } });
+      if (existing.length > 0) {
+        await prisma.performanceCriterion.deleteMany({ where: { element_id: { in: existing.map((e) => e.id) } } });
+        await prisma.unitElement.deleteMany({ where: { unit_id: unitId } });
+      }
 
       for (const elem of detail.elements) {
         const newElem = await prisma.unitElement.create({
