@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { TasVersionList } from '@/components/tas/TasVersionList';
+import { TasUploadForm } from '@/components/tas/TasUploadForm';
 
 function statusBadge(status: string) {
   const lower = status.toLowerCase();
@@ -20,6 +23,15 @@ interface Props {
 
 export function QualificationDetail({ rtoId, qualId }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [showUpload, setShowUpload] = useState(false);
+  const [showArchiveNotice, setShowArchiveNotice] = useState(false);
+
+  useEffect(() => {
+    if (!showArchiveNotice) return;
+    const t = setTimeout(() => setShowArchiveNotice(false), 4000);
+    return () => clearTimeout(t);
+  }, [showArchiveNotice]);
 
   const { data: rto } = useQuery({
     queryKey: ['rto', rtoId],
@@ -146,15 +158,33 @@ export function QualificationDetail({ rtoId, qualId }: Props) {
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">TAS Documents</h2>
-          <button className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity">
+          <button
+            onClick={() => setShowUpload(true)}
+            className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
+          >
             Upload TAS
           </button>
         </div>
-        <div data-tas-version-list-slot data-rto-id={rtoId} data-qual-id={qualId}>
-          {(!qual.tasDocuments || qual.tasDocuments.length === 0) ? (
-            <p className="text-sm text-muted-foreground">No TAS documents uploaded yet.</p>
-          ) : null}
-        </div>
+        {showArchiveNotice && (
+          <p className="text-sm text-muted-foreground mb-3">
+            Previous version has been archived automatically.
+          </p>
+        )}
+        <TasVersionList tasDocuments={qual.tasDocuments ?? []} />
+        {showUpload && (
+          <TasUploadForm
+            rtoId={rtoId}
+            qualifications={[{ id: qual.id, code: qual.code, title: qual.title }]}
+            presetQualificationId={qual.id}
+            onClose={() => setShowUpload(false)}
+            onUploaded={({ autoArchived }) => {
+              setShowUpload(false);
+              if (autoArchived) setShowArchiveNotice(true);
+              void queryClient.invalidateQueries({ queryKey: ['qualification', qualId] });
+              void queryClient.invalidateQueries({ queryKey: ['tas', rtoId] });
+            }}
+          />
+        )}
       </div>
 
       {/* Trainers placeholder */}

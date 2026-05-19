@@ -40,6 +40,33 @@ export async function getTasByRto(rtoId: string) {
   return apiFetch(`/tas/rtos/${rtoId}`);
 }
 
+export async function getRtoTasDocuments(rtoId: string) {
+  return apiFetch(`/tas/rtos/${rtoId}`);
+}
+
+export async function getTasPresignedUrl(input: {
+  rtoId: string;
+  fileName: string;
+  fileSize: number;
+  contentType: string;
+}) {
+  return apiFetch('/tas/presign', { method: 'POST', body: JSON.stringify(input) });
+}
+
+export async function createTasDocument(input: {
+  rtoId: string;
+  qualificationId: string;
+  versionLabel: string;
+  status: 'Draft' | 'Current';
+  fileKey: string;
+  fileName: string;
+  fileSize: number;
+  reviewDate?: string;
+  unitIds?: string[];
+}) {
+  return apiFetch('/tas', { method: 'POST', body: JSON.stringify(input) });
+}
+
 // --- Core fetch ---
 
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<any> {

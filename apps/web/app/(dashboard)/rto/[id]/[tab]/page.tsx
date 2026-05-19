@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { RtoWorkspaceHeader } from '@/components/rto/rto-workspace-header';
 import { QualificationsTab } from '@/components/qualifications/QualificationsTab';
+import { TasTab } from '@/components/tas/TasTab';
 
 const TABS = [
   'qualifications',
@@ -58,6 +59,8 @@ export default async function RtoTabPage({
       <div>
         {tab === 'qualifications' ? (
           <QualificationsTab rtoId={id} />
+        ) : tab === 'tas' ? (
+          <TasTab rtoId={id} />
         ) : (
           <>
             <h2 className="text-xl font-semibold">{tabLabel(tab)} — Coming Soon</h2>
