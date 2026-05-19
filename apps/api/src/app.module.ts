@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { TgaModule } from './tga/tga.module';
 import { QualificationModule } from './qualification/qualification.module';
 import { UnitModule } from './unit/unit.module';
+import { TasModule } from './tas/tas.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UnitModule } from './unit/unit.module';
     TgaModule,
     QualificationModule,
     UnitModule,
+    TasModule,
   ],
 })
 export class AppModule {}
