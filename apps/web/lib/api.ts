@@ -28,6 +28,18 @@ export async function getRtoQualifications(rtoId: string) {
   return apiFetch(`/tga/rtos/${rtoId}/qualifications`);
 }
 
+export async function getQualificationDetail(qualId: string) {
+  return apiFetch(`/qualifications/${qualId}`);
+}
+
+export async function getUnitDetail(unitId: string) {
+  return apiFetch(`/units/${unitId}`);
+}
+
+export async function getTasByRto(rtoId: string) {
+  return apiFetch(`/tas/rtos/${rtoId}`);
+}
+
 // --- Core fetch ---
 
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<any> {

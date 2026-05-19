@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 import { getRtoQualifications } from '@/lib/api';
 import { ImportQualificationModal } from './ImportQualificationModal';
 
@@ -24,6 +26,7 @@ interface Props {
 export function QualificationsTab({ rtoId }: Props) {
   const [showImportModal, setShowImportModal] = useState(false);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: qualifications, isPending, isError } = useQuery<RtoQualification[]>({
     queryKey: ['rto-qualifications', rtoId],
@@ -76,13 +79,18 @@ export function QualificationsTab({ rtoId }: Props) {
                 <th className="pb-3 font-medium">Title</th>
                 <th className="pb-3 font-medium">Status</th>
                 <th className="pb-3 font-medium">Last Synced</th>
+                <th className="pb-3 w-8"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {qualifications.map((rq) => (
                 <tr
                   key={rq.id}
-                  className="text-foreground hover:bg-muted/50 transition-colors"
+                  role="link"
+                  tabIndex={rq.qualification?.id ? 0 : undefined}
+                  className={`text-foreground hover:bg-muted/50 transition-colors min-h-[44px]${rq.qualification?.id ? ' cursor-pointer' : ''}`}
+                  onClick={() => rq.qualification?.id && router.push(`/rto/${rtoId}/qualifications/${rq.qualification.id}`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && rq.qualification?.id) router.push(`/rto/${rtoId}/qualifications/${rq.qualification.id}`); }}
                 >
                   <td className="py-3 font-mono">{rq.qualification?.code ?? '—'}</td>
                   <td className="py-3">{rq.qualification?.title ?? '—'}</td>
@@ -105,6 +113,9 @@ export function QualificationsTab({ rtoId }: Props) {
                     {rq.qualification?.last_synced_at
                       ? new Date(rq.qualification.last_synced_at).toLocaleDateString()
                       : '—'}
+                  </td>
+                  <td className="py-3">
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </td>
                 </tr>
               ))}
