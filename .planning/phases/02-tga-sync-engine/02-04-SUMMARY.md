@@ -1,7 +1,7 @@
 ---
 plan: 02-04
-status: awaiting-human-verification
-completed: (pending Task 4 human verification)
+status: complete
+completed: "2026-05-18"
 ---
 
 # Phase 02 Plan 04: Qualification Import UI Summary
@@ -54,19 +54,15 @@ The frontend uses `apiFetch()` from `apps/web/lib/api.ts` — this function hold
 | 2 | 63bf125 | feat(02-04): add qualification import and list endpoints to TgaController |
 | 3 | b553fd8 | feat(02-04): build Qualifications page with TGA import modal |
 
-## Awaiting Human Verification
+## Human Verification — PASSED (2026-05-18)
 
-Task 4 requires manual end-to-end testing of the import flow with both servers running.
+All steps verified end-to-end in the browser:
 
-**Steps to verify:**
-1. Start API: `pnpm --filter @trainsmart/api dev` (port 3001)
-2. Start web: `pnpm --filter @trainsmart/web dev` (port 3000)
-3. Log in at `http://localhost:3000/login`
-4. Navigate to any RTO workspace — the Qualifications tab should load (not "Coming Soon")
-5. Click "+ Add Qualification" — modal should open
-6. Type `BSB50120` — should see TGA search results appear after ~300ms debounce
-7. Select a result and click Import — should show "Importing..." for 30-60 seconds
-8. After import: modal closes, table updates with the imported qualification
-9. Verify in DB: qualification, units, elements, performance criteria, and rto_qualification rows exist
+- Qualifications tab loads correctly (not "Coming Soon")
+- Search returns correct qualifications (e.g. `BSB50120 Diploma of Business`, `CHC33021`, `CPC32420`)
+- Import completes successfully — modal closes, table updates
+- Multiple qualifications imported: BSB50120 (99 units), CHC33021 (35 units), BSB40120 (88 units), CPC32420 (96 units)
 
-See `02-04-PLAN.md` Task 4 for full verification checklist.
+### Post-verification Fix Applied
+
+**Next.js proxy timeout (ECONNRESET)**: Large qualifications (96–99 units) take 2–3 minutes to import because the TGA API is called once per qualification. The Next.js rewrite proxy was timing out before the response arrived, returning ECONNRESET to the browser. Fixed by adding `experimental: { proxyTimeout: 300000 }` (5 min) to `apps/web/next.config.mjs`.

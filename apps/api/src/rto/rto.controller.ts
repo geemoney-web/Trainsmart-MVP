@@ -12,7 +12,6 @@ import {
 import { RtoService } from './rto.service';
 import { CreateRtoDto } from './dto/create-rto.dto';
 import { UpdateRtoDto } from './dto/update-rto.dto';
-
 @Controller('rtos')
 export class RtoController {
   constructor(private readonly rtoService: RtoService) {}

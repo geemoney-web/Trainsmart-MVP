@@ -7,8 +7,10 @@ import {
   Req,
   ConflictException,
   NotFoundException,
+  InternalServerErrorException,
   HttpCode,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { prisma } from '@repo/db';
@@ -20,6 +22,8 @@ import { ImportQualificationDto } from './dto/import-qualification.dto';
 
 @Controller('tga')
 export class TgaController {
+  private readonly logger = new Logger(TgaController.name);
+
   constructor(
     private readonly scheduler: TgaSchedulerService,
     private readonly syncService: TgaSyncService,
@@ -68,7 +72,13 @@ export class TgaController {
     @Param('rtoId') rtoId: string,
     @Body() dto: ImportQualificationDto,
   ) {
-    return this.importService.importQualification(rtoId, dto.qualificationCode);
+    try {
+      return await this.importService.importQualification(rtoId, dto.qualificationCode);
+    } catch (err: any) {
+      this.logger.error(`Import failed for ${dto.qualificationCode}: ${err.message}`, err.stack);
+      if (err.status) throw err; // rethrow NestJS HttpExceptions (404 etc) as-is
+      throw new InternalServerErrorException(err.message ?? 'Import failed');
+    }
   }
 
   @Get('rtos/:rtoId/qualifications')

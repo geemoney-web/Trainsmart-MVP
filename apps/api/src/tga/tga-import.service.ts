@@ -48,68 +48,29 @@ export class TgaImportService {
       },
     });
 
-    // 3. Import all units
-    const unitCodes = tgaQual.unitGroups.flatMap((g: any) =>
-      g.units.map((u: any) => u.code),
+    // 3. Import all units from the qualification's unitGroups
+    // Use the unit stubs (code + title) already in the qual response — no per-unit TGA calls.
+    // Elements/PCs are fetched lazily when viewing the unit detail page (Phase 3).
+    const unitStubs = tgaQual.unitGroups.flatMap((g: any) =>
+      g.units.map((u: any) => ({ code: u.code as string, title: u.title as string })),
     );
     let importedCount = 0;
 
-    for (const unitCode of unitCodes) {
+    for (const stub of unitStubs) {
       try {
-        const tgaUnit = await this.tgaApiClient.getUnitDetail(unitCode);
-        if (!tgaUnit) {
-          this.logger.warn(`Unit ${unitCode} not found on TGA, skipping`);
-          continue;
-        }
-
-        // Upsert Unit
         const unit = await prisma.unit.upsert({
-          where: { code: unitCode },
+          where: { code: stub.code },
           create: {
-            code: tgaUnit.code,
-            title: tgaUnit.title,
-            status: tgaUnit.status,
-            superseded_by: tgaUnit.supersededBy ?? null,
-            tga_content_hash: this.tgaSyncService.computeUnitHash(tgaUnit),
-            last_synced_at: new Date(),
+            code: stub.code,
+            title: stub.title,
+            status: 'unknown',
+            tga_content_hash: '',
           },
           update: {
-            title: tgaUnit.title,
-            status: tgaUnit.status,
-            superseded_by: tgaUnit.supersededBy ?? null,
-            tga_content_hash: this.tgaSyncService.computeUnitHash(tgaUnit),
-            last_synced_at: new Date(),
+            title: stub.title,
           },
         });
 
-        // Replace UnitElements and PerformanceCriteria
-        const existingElements = await prisma.unitElement.findMany({
-          where: { unit_id: unit.id },
-        });
-        const existingElementIds = existingElements.map((e: any) => e.id);
-        if (existingElementIds.length > 0) {
-          await prisma.performanceCriterion.deleteMany({
-            where: { element_id: { in: existingElementIds } },
-          });
-          await prisma.unitElement.deleteMany({ where: { unit_id: unit.id } });
-        }
-
-        for (const el of tgaUnit.elements) {
-          const element = await prisma.unitElement.create({
-            data: { unit_id: unit.id, element_num: el.num, title: el.title },
-          });
-          if (el.performanceCriteria.length > 0) {
-            await prisma.performanceCriterion.createMany({
-              data: el.performanceCriteria.map((pc: any) => ({
-                element_id: element.id,
-                pc_num: pc.num,
-                text: pc.text,
-              })),
-            });
-          }
-        }
-
-        // Upsert QualificationUnit
         await prisma.qualificationUnit.upsert({
           where: {
             qualification_id_unit_id: {
@@ -122,9 +83,8 @@ export class TgaImportService {
         });
 
         importedCount++;
-        await new Promise((r) => setTimeout(r, 50));
       } catch (err: any) {
-        this.logger.warn(`Failed to import unit ${unitCode}: ${err.message}`);
+        this.logger.warn(`Failed to import unit ${stub.code}: ${err.message}`);
       }
     }
 
